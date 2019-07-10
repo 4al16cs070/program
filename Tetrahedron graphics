@@ -1,0 +1,75 @@
+// Tetrahedron1.cpp : Defines the entry point for the console application.
+//
+
+#include "stdafx.h"
+#include<gl/glut.h>
+int n=0;
+void init()
+{
+	glClearColor(0,0,0,1);
+	glOrtho(0,1,0,1,-2,2);
+	glEnable(GL_DEPTH_TEST);
+}
+void triangle(float*a,float*b,float*c)
+{
+	glBegin(GL_TRIANGLES);
+	glVertex3fv(a);
+	glVertex3fv(b);
+	glVertex3fv(c);
+}
+void tetra(float*v0,float*v1,float*v2,float*v3)
+{
+	
+	
+	glColor3f(1,0,0);
+	triangle(v0,v1,v2);
+	glColor3f(0,1,0);
+	triangle(v0,v2,v3);
+	glColor3f(0,0,1);
+	triangle(v0,v1,v3);
+	glColor3f(1,0,0);
+	triangle(v1,v2,v3);
+}
+void divide_tetra(float *v0,float *v1,float *v2,float *v3,int n)
+{
+	float m[6][3];
+	for(int i=0;i<3;i++)
+	{
+		m[0][i]=(v1[i]+v3[i])/2;
+		m[1][i]=(v1[i]+v2[i])/2;
+		m[2][i]=(v2[i]+v3[i])/2;
+		m[3][i]=(v2[i]+v0[i])/2;
+		m[4][i]=(v1[i]+v0[i])/2;
+		m[5][i]=(v0[i]+v3[i])/2;
+	}
+	if(n>0)
+	{
+		divide_tetra(m[4],v1,m[1],m[0],n-1);
+		divide_tetra(m[3],m[1],v2,m[2],n-1);
+		divide_tetra(m[5],m[0],m[2],v3,n-1);
+		divide_tetra(v0,m[4],m[3],m[5],n-1);
+	}
+	else
+		tetra(v0,v1,v2,v3);
+}
+void display()
+{
+	
+	float v[4][3]={{0.5,0.25,0.75},{0,0,0},{0.5,0.75,0},{1,0,0}};
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	divide_tetra(v[0],v[1],v[2],v[3],n);
+	glEnd();
+	glFlush();
+}
+void main()
+{
+	printf("Enter value of n");
+	scanf("%d",&n);
+	glutInitDisplayMode(GLUT_SINGLE|GLUT_DEPTH);
+	glutInitWindowSize(600,600);
+	glutInitWindowPosition(50,50);
+	glutCreateWindow("Tetrahedron");
+	init();
+	glutDisplayFunc(display);
+	glutMainLoop();
+}
